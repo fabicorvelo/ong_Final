@@ -68,7 +68,7 @@
                 divProduto.classList.add('produto');
 
                 // Define a classe com base no tempo até o vencimento
-                if (item.diffDias > 15) {
+                if (item.diffDias >= 0) {
              
                     divProduto.classList.add('vermelho');
                 }
