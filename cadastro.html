@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <title>Cadastrar Produto</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+         /* Estilos para inputs */
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="file"] {
+            color: black; /* Define a cor do texto como preta */
+            background-color: white; /* Define a cor de fundo como branca para contraste */
+        }
+        /* Estilo para o botão limpar */
+        .btn-limpar {
+            background-color: green; /* Cor de fundo verde */
+            color: white; /* Cor do texto em branco */
+            border: none; /* Sem borda */
+            padding: 10px 15px; /* Padding do botão */
+            cursor: pointer; /* Cursor tipo pointer */
+            border-radius: 5px; /* Bordas arredondadas */
+            margin-top: 10px; /* Espaçamento acima */
+        }
+
+        .btn-limpar:hover {
+            background-color: darkgreen; /* Cor de fundo ao passar o mouse */
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="form-container">
+        <br><br><br><br><br><br><br><br><br>
+        <h1>Cadastrar Produto</h1>
+        <form id="cadastroForm">
+           
+            <!-- Pré-visualização da imagem -->
+            <img id="imagemPreview" src="#" alt="Pré-visualização da imagem" style="display:none; width: 100px;"><br><br>
+
+            <label for="nome">Nome do Produto:</label>
+            <input type="text" id="nome" required><br><br>
+
+            <label for="quantidade">Quantidade:</label>
+            <input type="number" id="quantidade" required><br><br>
+
+            
+            <label for="dataEntrada">Data de Entrada:</label>
+            <input type="date" id="dataEntrada" required><br><br>
+
+            <label for="validade">Validade:</label>
+            <input type="date" id="validade" required><br><br>
+
+            <label for="imagem">Imagem do Produto (opcional):</label>
+            <input type="file" id="imagem" accept="image/*"><br>
+
+
+            <button type="submit">Cadastrar</button>
+            <button type="button" onclick="window.location.href='index.html'">Voltar ao Menu</button>
+            <button type="button" class="btn-limpar" onclick="limparCampos()">Limpar Campos</button>
+            <p id="mensagem"></p>
+        </form>
+    </div>
+
+    <script>
+        // Função para exibir a pré-visualização da imagem opcionalmente
+        const inputImagem = document.getElementById('imagem');
+        const imgPreview = document.getElementById('imagemPreview');
+
+        inputImagem.addEventListener('change', function(event) {
+            const arquivo = event.target.files[0];
+            if (arquivo) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imgPreview.src = e.target.result;
+                    imgPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(arquivo);
+            } else {
+                imgPreview.style.display = 'none';
+            }
+        });
+
+        // Função para cadastrar produto
+        document.getElementById('cadastroForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita o envio do formulário
+
+            // Obtém os valores dos campos do formulário
+            const nome = document.getElementById('nome').value;
+            const quantidade = parseFloat(document.getElementById('quantidade').value); // Converte a quantidade para número
+            const validade = document.getElementById('validade').value;
+            const dataEntrada = document.getElementById('dataEntrada').value;
+            const imagem = inputImagem.files[0] ? imgPreview.src : ''; // Se a imagem for opcional, usa o src da imagem ou uma string vazia
+
+            // Validações básicas
+            if (!nome || isNaN(quantidade) || quantidade <= 0 || !validade || !dataEntrada) {
+                document.getElementById('mensagem').textContent = "Preencha todos os campos obrigatórios corretamente.";
+                return;
+            }
+
+            // Verifica se já existem produtos cadastrados
+            let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+
+            // Verifica se o produto já existe no localStorage
+            let produtoExistente = produtos.find(produto => produto.nome.toLowerCase() === nome.toLowerCase());
+
+            if (produtoExistente) {
+                // Exibe uma mensagem de erro se o produto já estiver cadastrado
+                document.getElementById('mensagem').textContent = "Este produto já foi cadastrado!";
+                return; // Impede o cadastro duplicado
+            }
+
+            // Cria um novo produto se ele não existir
+            const novoProduto = {
+                nome: nome,
+                quantidade: quantidade,
+                validade: validade,
+                dataEntrada: dataEntrada,
+                imagem: imagem // Armazena o caminho da imagem (se houver)
+            };
+
+            // Adiciona o novo produto à lista de produtos
+            produtos.push(novoProduto);
+
+            // Armazena no localStorage
+            localStorage.setItem('produtos', JSON.stringify(produtos));
+
+            // Exibe uma mensagem de sucesso
+            document.getElementById('mensagem').textContent = "Produto cadastrado com sucesso!";
+
+            // Limpa o formulário
+            document.getElementById('cadastroForm').reset();
+            imgPreview.style.display = 'none'; // Esconde a pré-visualização após o cadastro
+        });
+
+        // Função para limpar os campos do formulário
+        function limparCampos() {
+            document.getElementById('cadastroForm').reset(); // Limpa todos os campos
+            imgPreview.style.display = 'none'; // Esconde a pré-visualização
+            document.getElementById('mensagem').textContent = ""; // Limpa a mensagem
+        }
+    </script>
+</body>
+</html>
